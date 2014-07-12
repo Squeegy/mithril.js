@@ -1527,6 +1527,43 @@ function testMithril(mock) {
 		return success;
 	})
 
+	test(function() {
+		var view = m('.parent', [
+			'text node',
+			[],
+			null,
+			undefined,
+			m('p.tag-node', 'tag node'),
+			'',
+			[m('p.nested-tag-node', 'tag-node')],
+			false
+		])
+
+		var expected = {
+			"tag": "div",
+			"attrs": {
+				"className": "parent"
+			},
+			"children": [
+				"text node",
+				{
+					"tag": "p",
+					"attrs": {
+						"className": "tag-node"
+					},
+					"children": "tag node"
+				},
+				{
+					"tag": "p",
+					"attrs": {
+						"className": "nested-tag-node"
+					},
+					"children": "tag-node"
+				}
+			]
+		}
+		return JSON.stringify(view) === JSON.stringify(expected)
+	})
 }
 
 //mocks

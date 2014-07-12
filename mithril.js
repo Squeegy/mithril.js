@@ -25,7 +25,21 @@ Mithril = m = new function app(window) {
 		}
 		cell = clone(cell)
 		cell.attrs = clone(cell.attrs)
-		cell.children = hasAttrs ? args[2] : args[1]
+		var children = hasAttrs ? args[2] : args[1]
+		if (children) {
+			if (children instanceof Array) {
+				cell.children = []
+				for (var i = 0; i < children.length; i++) {
+					var child = children[i]
+					if (child) {
+						if (child instanceof Array) Array.prototype.push.apply(cell.children, child)
+						else cell.children.push(child)
+					}
+				}
+			} else {
+				cell.children = children
+			}
+		}
 		for (var attrName in attrs) {
 			if (attrName == classAttrName) cell.attrs[attrName] = (cell.attrs[attrName] || "") + " " + attrs[attrName]
 			else cell.attrs[attrName] = attrs[attrName]
@@ -52,7 +66,7 @@ Mithril = m = new function app(window) {
 
 		if (dataType == "[object Array]") {
 			var nodes = [], intact = cached.length === data.length, subArrayCount = 0
-			
+
 			var DELETION = 1, INSERTION = 2 , MOVE = 3
 			var existing = {}, shouldMaintainIdentities = false
 			for (var i = 0; i < cached.length; i++) {
@@ -72,7 +86,7 @@ Mithril = m = new function app(window) {
 				var actions = Object.keys(existing).map(function(key) {return existing[key]})
 				var changes = actions.sort(function(a, b) {return a.action - b.action || b.index - a.index})
 				var newCached = new Array(cached.length)
-				
+
 				for (var i = 0, change; change = changes[i]; i++) {
 					if (change.action == DELETION) {
 						clear(cached[change.index].nodes, cached[change.index])
@@ -84,7 +98,7 @@ Mithril = m = new function app(window) {
 						parentElement.insertBefore(dummy, parentElement.childNodes[change.index])
 						newCached.splice(change.index, 0, {attrs: {key: data[change.index].attrs.key}, nodes: [dummy]})
 					}
-					
+
 					if (change.action == MOVE) {
 						if (parentElement.childNodes[change.index] !== change.element) {
 							parentElement.insertBefore(change.element, parentElement.childNodes[change.index])
@@ -96,7 +110,7 @@ Mithril = m = new function app(window) {
 				cached.nodes = []
 				for (var i = 0, child; child = parentElement.childNodes[i]; i++) cached.nodes.push(child)
 			}
-			
+
 			for (var i = 0, cacheCount = 0; i < data.length; i++) {
 				var item = build(parentElement, parentTag, cached, index, data[i], cached[cacheCount], shouldReattach, index + subArrayCount || subArrayCount, editable, namespace, configs)
 				if (item === undefined) continue
@@ -120,7 +134,7 @@ Mithril = m = new function app(window) {
 				if (data.length < cached.length) cached.length = data.length
 				cached.nodes = nodes
 			}
-			
+
 		}
 		else if (dataType == "[object Object]") {
 			if (data.tag != cached.tag || Object.keys(data.attrs).join() != Object.keys(cached.attrs).join() || data.attrs.id != cached.attrs.id) {
